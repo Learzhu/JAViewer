@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.github.javiewer.R;
@@ -110,9 +110,42 @@ public class DownloadLinkAdapter extends ItemAdapter<DownloadLink, DownloadLinkA
                     .setPositiveButton("打开", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(magnetLink));
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mParentActivity.startActivity(intent);
+//                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(magnetLink));
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            mParentActivity.startActivity(intent);
+
+                            //没有http协议是不能直接跳转到浏览器的会直接.ActivityNotFoundException: No Activity found to handle Intent
+//                            Uri uri = Uri.parse("www.baidu.com");
+//                            Uri uri = Uri.parse("http://www.baidu.com");
+//                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            mParentActivity.startActivity(intent);
+                            //方法1：加上协议
+                            //避免没有浏览器的情况的奔溃
+                            //错误的
+//                                Uri parse = Uri.parse("http://" + magnetLink);
+                            Uri.Builder builder = new Uri.Builder();
+                            builder.scheme("https")
+                                    .authority(magnetLink)
+                                    .appendPath("turtles")
+                                    .appendPath("types")
+                                    .appendQueryParameter("type", "1")
+                                    .appendQueryParameter("sort", "relevance")
+                                    .fragment("section-name");
+                            try {
+                                Intent intent = new Intent(Intent.ACTION_VIEW, builder.build());
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                mParentActivity.startActivity(intent);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+//                            try {
+//                                //方法2：使用DownloadManager
+//                                downloadMovie(mParentActivity, builder.build().toString(), "下载", "小电影");
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+
                         }
                     })
                     .setNegativeButton("取消", null)
@@ -148,4 +181,22 @@ public class DownloadLinkAdapter extends ItemAdapter<DownloadLink, DownloadLinkA
             mTextDate.setText(link.getDate());
         }
     }
+
+
+    /**
+     * 判断是否有浏览器
+     *
+     * @param context
+     * @return
+     */
+//    private boolean hasBrowser(Context context) {
+//        PackageManager pm = context.getPackageManager();
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+//        intent.setData(Uri.parse("http://"));
+//
+//        List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.GET_INTENT_FILTERS);
+//        final int size = (list == null) ? 0 : list.size();
+//        return size > 0;
+//    }
 }
